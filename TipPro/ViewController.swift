@@ -8,11 +8,25 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+// conformint the view controller to a protocol(delegation)
+class ViewController: UIViewController, UITextFieldDelegate {
 
+    @IBOutlet weak var billAmountField: UITextField!
+    @IBOutlet weak var tipSelector: UISegmentedControl!
+    @IBOutlet weak var tipAmountField: UITextField!
+    @IBOutlet weak var totalAmountField: UITextField!
+    
+    
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return .LightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        // this controller is its own delegate.
+        billAmountField.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -20,6 +34,70 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    
+    @IBAction func textChanged(sender: AnyObject) {
+        print("text has changed: \(billAmountField.text)")
+        // update text to display digits with commas
+        // write a function to simply readability
+    }
+    
+    @IBAction func calculateTip(sender: AnyObject) {
+        guard let billAmount = Double(billAmountField.text!) else {
+            // show error - ?
+            billAmountField.text = ""
+            tipAmountField.text = ""
+            totalAmountField.text = ""
+            
+            return
+        }
+        
+        var tipSelected = 0.00
+        
+        switch tipSelector.selectedSegmentIndex {
+        case 0:
+            tipSelected = 0.15
+        case 1:
+            tipSelected = 0.18
+        case 2:
+            tipSelected = 0.20
+        default:
+            break // No tip selected = 0.00
+        }
+        
+        // Calculations
+        let roundedBillAmount = round(100 * billAmount) / 100 // get rid of decimal digits beyond hundredths
+        let tipAmount = roundedBillAmount * tipSelected
+        let roundedTipAmount = round(100 * tipAmount) / 100
+        let totalAmount = roundedBillAmount + roundedTipAmount
+        
+        if (!billAmountField.editing) {
+            billAmountField.text = String(format: "%.2f", roundedBillAmount)
+        }
+        tipAmountField.text = String(format: "%.2f", roundedTipAmount)
+        totalAmountField.text = String(format: "%.2f", totalAmount)
+    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
